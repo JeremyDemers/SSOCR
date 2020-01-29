@@ -22,12 +22,10 @@ arc_tan_theta = 6.0  # Digital tube tilt angle
 parser = argparse.ArgumentParser()
 parser.add_argument('image_path', help='path to image')
 parser.add_argument('-s', '--show_image', action='store_const', const=True, help='whether to show image')
-parser.add_argument('-d', '--is_debug', action='store_const', const=True, help='True or False')
 
 
 def load_image(path, show=False):
     gray_img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-    h, w = gray_img.shape
     blurred = cv2.GaussianBlur(gray_img, (7, 7), 0)
     if show:
         cv2.imshow('gray_img', gray_img)
@@ -83,7 +81,7 @@ def find_digits_positions(img, reserved_threshold=20):
     horizon_position = helper_extract(img_array, threshold=reserved_threshold)
     img_array = np.sum(img, axis=1)
     vertical_position = helper_extract(img_array, threshold=reserved_threshold * 4)
-    
+
     # make vertical_position has only one element
     if len(vertical_position) > 1:
         vertical_position = [(vertical_position[0][0], vertical_position[len(vertical_position) - 1][1])]
@@ -95,54 +93,9 @@ def find_digits_positions(img, reserved_threshold=20):
     return digits_positions
 
 
-def recognize_digits_area_method(digits_positions, output_img, input_img):
-    digits = []
-    for c in digits_positions:
-        x0, y0 = c[0]
-        x1, y1 = c[1]
-        roi = input_img[y0:y1, x0:x1]
-        h, w = roi.shape
-        suppose_w = max(1, int(h / H_W_Ratio))
-        if w < suppose_w / 2:
-            x0 = x0 + w - suppose_w
-            w = suppose_w
-            roi = input_img[y0:y1, x0:x1]
-        width = (max(int(w * 0.15), 1) + max(int(h * 0.15), 1)) // 2
-        dhc = int(width * 0.8)
-
-        small_delta = int(h / arc_tan_theta) // 4
-        segments = [
-            ((w - width - small_delta, width // 2), (w, (h - dhc) // 2)),
-            ((w - width - 2 * small_delta, (h + dhc) // 2), (w - small_delta, h - width // 2)),
-            ((width - small_delta, h - width), (w - width - small_delta, h)),
-            ((0, (h + dhc) // 2), (width, h - width // 2)),
-            ((small_delta, width // 2), (small_delta + width, (h - dhc) // 2)),
-            ((small_delta, 0), (w + small_delta, width)),
-            ((width - small_delta, (h - dhc) // 2), (w - width - small_delta, (h + dhc) // 2))
-        ]
-
-        on = [0] * len(segments)
-
-        for (i, ((xa, ya), (xb, yb))) in enumerate(segments):
-            seg_roi = roi[ya:yb, xa:xb]
-            total = cv2.countNonZero(seg_roi)
-            area = (xb - xa) * (yb - ya) * 0.9
-            print(total / float(area))
-            if total / float(area) > 0.45:
-                on[i] = 1
-
-        if tuple(on) in DIGITS_LOOKUP.keys():
-            digit = DIGITS_LOOKUP[tuple(on)]
-        else:
-            digit = '*'
-        digits.append(digit)
-        cv2.rectangle(output_img, (x0, y0), (x1, y1), (0, 128, 0), 2)
-        cv2.putText(output_img, str(digit), (x0 - 10, y0 + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 128, 0), 2)
-
-    return digits
-
-
 def recognize_digits_line_method(digits_positions, output_img, input_img):
+    output_img = cv2.cvtColor(output_img, cv2.COLOR_GRAY2RGB)
+    # input_img = cv2.cvtColor(input_img, cv2.COLOR_GRAY2RGB)
     digits = []
     for c in digits_positions:
         x0, y0 = c[0]
@@ -158,7 +111,6 @@ def recognize_digits_line_method(digits_positions, output_img, input_img):
         if w < suppose_w / 2:
             x0 = max(x0 + w - suppose_w, 0)
             roi = input_img[y0:y1, x0:x1]
-            w = roi.shape[1]
 
         center_y = h // 2
         quarter_y_1 = h // 4
@@ -199,23 +151,22 @@ def recognize_digits_line_method(digits_positions, output_img, input_img):
                           (x1, y1), (0, 128, 0), 2)
             cv2.putText(output_img, 'dot',
                         (x0 + w - int(3 * width / 4), y0 + h - int(3 * width / 4) - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 128, 0), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 200, 0), 2)
 
-        cv2.rectangle(output_img, (x0, y0), (x1, y1), (0, 128, 0), 2)
-        cv2.putText(output_img, str(digit), (x0 + 3, y0 + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 128, 0), 2)
-    return digits
+        cv2.rectangle(output_img, (x0, y0), (x1, y1), (0, 200, 0), 2)
+        cv2.putText(output_img, str(digit), (x0 + 3, y0 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 200, 0), 2)
+    return digits, output_img
 
 
 def main():
     args = parser.parse_args()
-    print(f'args: {args}')
     blurred, gray_img = load_image(args.image_path, show=args.show_image)
     output = blurred
     dst = preprocess(blurred, THRESHOLD, show=args.show_image)
     digits_positions = find_digits_positions(dst)
-    digits = recognize_digits_line_method(digits_positions, output, dst)
+    digits, output_img = recognize_digits_line_method(digits_positions, output, dst)
     if args.show_image:
-        cv2.imshow('output', output)
+        cv2.imshow('output', output_img)
         cv2.waitKey()
         cv2.destroyAllWindows()
     print(digits)
