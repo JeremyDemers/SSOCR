@@ -103,7 +103,6 @@ def recognize_digits_area_method(digits_positions, output_img, input_img):
         roi = input_img[y0:y1, x0:x1]
         h, w = roi.shape
         suppose_w = max(1, int(h / H_W_Ratio))
-        # Individual identification of case 1
         if w < suppose_w / 2:
             x0 = x0 + w - suppose_w
             w = suppose_w
@@ -156,7 +155,6 @@ def recognize_digits_line_method(digits_positions, output_img, input_img):
         if x1 - x0 < 25 and cv2.countNonZero(roi) / ((y1 - y0) * (x1 - x0)) < 0.2:
             continue
 
-        # Individual identification of case 1
         if w < suppose_w / 2:
             x0 = max(x0 + w - suppose_w, 0)
             roi = input_img[y0:y1, x0:x1]
