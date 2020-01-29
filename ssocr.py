@@ -17,7 +17,7 @@ DIGITS_LOOKUP = {
 }
 H_W_Ratio = 1.9
 THRESHOLD = 35
-arc_tan_theta = 6.0  # 数码管倾斜角度
+arc_tan_theta = 6.0  # Digital tube tilt angle
 crop_y0 = 215
 crop_y1 = 470
 crop_x0 = 260
@@ -46,12 +46,12 @@ def load_image(path, show=False):
 
 
 def preprocess(img, threshold, show=False, kernel_size=(5, 5)):
-    # 直方图局部均衡化
+    # Histogram local equalization
     clahe = cv2.createCLAHE(clipLimit=2, tileGridSize=(6, 6))
     img = clahe.apply(img)
-    # 自适应阈值二值化
+    # Adaptive threshold binarization
     dst = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 127, threshold)
-    # 闭运算开运算
+    # Closed operation open operation
     kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, kernel_size)
     dst = cv2.morphologyEx(dst, cv2.MORPH_CLOSE, kernel)
     dst = cv2.morphologyEx(dst, cv2.MORPH_OPEN, kernel)
@@ -125,7 +125,7 @@ def recognize_digits_area_method(digits_positions, output_img, input_img):
         roi = input_img[y0:y1, x0:x1]
         h, w = roi.shape
         suppose_W = max(1, int(h / H_W_Ratio))
-        # 对1的情况单独识别
+        # Individual identification of case 1
         if w < suppose_W / 2:
             x0 = x0 + w - suppose_W
             w = suppose_W
@@ -170,8 +170,6 @@ def recognize_digits_area_method(digits_positions, output_img, input_img):
 
         for (i, ((xa, ya), (xb, yb))) in enumerate(segments):
             seg_roi = roi[ya:yb, xa:xb]
-            # plt.imshow(seg_roi)
-            # plt.show()
             total = cv2.countNonZero(seg_roi)
             area = (xb - xa) * (yb - ya) * 0.9
             print(total / float(area))
@@ -200,11 +198,11 @@ def recognize_digits_line_method(digits_positions, output_img, input_img):
         h, w = roi.shape
         suppose_W = max(1, int(h / H_W_Ratio))
 
-        # 消除无关符号干扰
+        # Eliminate extraneous symbol interference
         if x1 - x0 < 25 and cv2.countNonZero(roi) / ((y1 - y0) * (x1 - x0)) < 0.2:
             continue
 
-        # 对1的情况单独识别
+        # Individual identification of case 1
         if w < suppose_W / 2:
             x0 = max(x0 + w - suppose_W, 0)
             roi = input_img[y0:y1, x0:x1]
@@ -245,7 +243,7 @@ def recognize_digits_line_method(digits_positions, output_img, input_img):
 
         digits.append(digit)
 
-        # 小数点的识别
+        # decimal point recognition
         # print('dot signal: ',cv2.countNonZero(roi[h - int(3 * width / 4):h, w - int(3 * width / 4):w]) / (9 / 16 * width * width))
         if cv2.countNonZero(roi[h - int(3 * width / 4):h, w - int(3 * width / 4):w]) / (9. / 16 * width * width) > 0.65:
             digits.append('.')
