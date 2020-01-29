@@ -28,11 +28,10 @@ Detect the existence of the corresponding bit, then encode the image, you can ac
 ## Requirements
 * opencv
 * numpy
-* matplotlib
 
 ## Setup
 ```
-git clone https://github.com/jiweibo/SSOCR.git
+git clone https://github.com/JeremyDemers/SSOCR.git
 python ssocr.py images/test1.bmp -s
 ```
 
