@@ -43,6 +43,7 @@ python ssocr.py images/test1.bmp -s
 ![test3.bmp](images/test3.bmp)
 ![res3.bmp](images/res3.bmp)
 ![test4.bmp](images/test4.bmp)
+![res4.bmp](images/res4.bmp)
 
 ```
 $ python ssocr.py images\test1.BMP
