@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import argparse
 
+# (top-right,bottom-right,bottom,bottom-left,left-top,top,middle)
 DIGITS_LOOKUP = {
     (1, 1, 1, 1, 1, 1, 0): 0,
     (1, 1, 0, 0, 0, 0, 0): 1,
