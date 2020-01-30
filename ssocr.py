@@ -95,7 +95,6 @@ def find_digits_positions(img, reserved_threshold=20):
 
 def recognize_digits_line_method(digits_positions, output_img, input_img):
     output_img = cv2.cvtColor(output_img, cv2.COLOR_GRAY2RGB)
-    # input_img = cv2.cvtColor(input_img, cv2.COLOR_GRAY2RGB)
     digits = []
     for c in digits_positions:
         x0, y0 = c[0]
