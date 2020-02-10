@@ -42,13 +42,13 @@ python ssocr.py images/test1.bmp -s
 ![res2.bmp](images/res2.bmp)
 
 ```
-$ python ssocr.py images\test1.bmp
+$ python ssocr.py -i images/test1.bmp
 ['-', 3, 0, '.', 3, 7]
-$ python ssocr.py images\test2.bmp -s
+$ python ssocr.py -i images/test2.bmp -s
 [1, 7, 7, '.', 7]
-$ python ssocr.py images\test3.bmp -s
+$ python ssocr.py -i images/test3.bmp -s
 [0, 7, 8, '.', 3]
-$ python ssocr.py images\test4.bmp -s
+$ python ssocr.py -i images/test4.bmp -s
 [0, 7, 2, '.', 6]
 ```
 
