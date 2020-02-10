@@ -21,7 +21,7 @@ THRESHOLD = 35
 arc_tan_theta = 6.0  # Digital tube tilt angle
 
 parser = argparse.ArgumentParser()
-parser.add_argument('image_path', help='path to image')
+parser.add_argument('-i', '--image_path', help="path to image ie ./images/sharp.jpg")
 parser.add_argument('-s', '--show_image', action='store_const', const=True, help='whether to show image')
 
 
